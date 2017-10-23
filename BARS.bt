@@ -1,0 +1,100 @@
+//------------------------------------------------
+//--- 010 Editor v8.0 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+BigEndian();
+
+struct BARS {
+    struct HEADER {
+        char magic[4]; // BARS
+        int fileSize;
+        byte byteMark[4]; // FE FF 01 01 - version?
+        int numberOfFiles;
+    } header;
+
+    int noIdea[header.numberOfFiles]; // Checksums?
+
+    struct OFFSET {
+        int amtaOffset;
+        int fWavOffset;
+    } offset[header.numberOfFiles];
+
+    struct AMTA {
+        char magic[4]; // AMTA
+        byte byteMark[4]; // FE FF 04 00 - version?
+        int length;
+        int dataOffset; // from amtaHeader
+        int markOffset; // from amtaHeader
+        int extOffset; // from amtaHeader
+        int strgOffset; // from amtaHeader
+
+        struct DATA {
+            char magic[4]; // DATA
+            int length;
+            byte padding[length];
+        } data;
+
+        struct MARK {
+            char magic[4]; // MARK
+            int length;
+            byte padding[length];
+        } mark;
+
+        struct EXT {
+            char magic[4]; // EXT_
+            int length;
+            byte padding[length];
+        } ext;
+
+        struct STRG {
+            char magic[4]; // STRG
+            int strLength;
+            char fileName[strLength];
+            byte padding[(4 - strLength % 4) % 4];
+        } strg;
+    } amta[header.numberOfFiles] <optimize=false>;
+
+    struct FILE {
+        struct FWAV {
+            char magic[4]; // FWAV
+            byte byteMark[4]; // FE FF 04 00 - version?
+            int unknown;
+            int fileSize;
+            int unknown2;
+            int unknown3;
+            int fwavLength;
+            int infoLength;
+            int unknown4;
+            int unknown5;
+            int dataLength;
+            byte padding[20];
+        } fwav;
+
+        struct INFO {
+            char magic[4]; // INFO
+            int length;
+            byte padding[length - 8];
+        } info;
+
+        struct FILEDATA {
+            char magic[4]; // DATA
+            int length;
+            byte dataBytes[length - 8];
+        } data;
+    };
+    
+    local int i;
+    for(i = 0; i < header.numberOfFiles; i++) {
+        FSeek(offset[i].fWavOffset);   
+        FILE file;
+    }
+} bars;
